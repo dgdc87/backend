@@ -1,0 +1,21 @@
+# config stuff
+port: 9001
+
+# expiresIn secods also possible '2h' for expiration in two hours
+jwt:
+  algorithm: 'HS256'
+  expiresIn: '6h'
+  secret: '8VmSJ3yW00qgr5kPXpxc/MQr2HISl2RBIpVD/cVg98mPsNmuxP'
+
+database:
+  user:     'root'
+  password: ''
+  host:     '127.0.0.1'
+  port:     8080
+  name:     'backapp'
+
+logger:
+  path: './logs/'
+  level:
+    console: 'silly'
+    file:    'error'
