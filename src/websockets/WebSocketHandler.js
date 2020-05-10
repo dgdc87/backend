@@ -4,22 +4,25 @@ class WebSocketHandler {
 
   constructor(io) {
     this.io     = io;
-    this.socket = null;
  }
+
+ connetions = 0;
 
   listenToSuscribtors = () => {
     this.io.sockets.on('connection', (sckt) => {
-      this.socket = sckt;
+      this.connetions++;
       logger.debug('websocket: a user connected');
-      this.socket.on('subscribeTo', (room)=> {
+      sckt.on('subscribeTo', (room)=> {
         logger.debug('joining to room ' + room);
-        this.socket.join(room);
+        sckt.join(room);
       });
 
-      this.socket.on('unsubscribeFrom', (room)=> {
+      sckt.on('unsubscribeFrom', (room)=> {
         logger.debug('leaving: ' + room);
-        this.socket.leave(room);
+        sckt.leave(room);
       });
+
+      this.io.sockets.emit('user-connected', this.connetions)
     });
   }
 

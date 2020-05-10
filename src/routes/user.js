@@ -24,7 +24,7 @@ router.post('/signin', async (req, res, next) => {
       db.query(queries.user.create, [req.body.username, req.body.firstname, req.body.lastname, req.body.email, defaultRole, req.body.password, date, date, date, jwt]).then( result => {
         req.body.id = parseInt(result.insertId);
         req.body.id_role = parseInt(defaultRole);
-        delete req.body.pass;
+        delete req.body.password;
         const userResponse = {
           token: jwt,
           user: req.body,

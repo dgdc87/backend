@@ -4,7 +4,7 @@ user = {
     create:      'INSERT INTO user (username, firstname, lastname, email, id_role, pass, reg_date, update_date, last_login, jwt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     delete:      'DELETE FROM user WHERE id = ?',
     update:      'UPDATE user SET firstname = ?, lastname = ?, email = ?, update_date = ? WHERE id = ?',
-    read:        'SELECT username, firstname, lastname, email, id_role, reg_date, update_date, last_login FROM user WHERE 1=1 ORDER BY id',
+    read:        'SELECT id, username, firstname, lastname, email, id_role, reg_date, update_date, last_login FROM user WHERE 1=1 ORDER BY id',
     getById:     'SELECT id, username, firstname, lastname, email, last_login, id_role FROM user WHERE id = ?',
     credentials: 'SELECT * FROM user WHERE username = ? AND pass = ?',
     login:       'UPDATE user SET jwt = ?, last_login = ? WHERE id = ?',
