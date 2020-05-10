@@ -3,7 +3,7 @@ const config    = require('config')
 
 const connection = mysql.createConnection({
     host    : `${config.get('database.host')}`,
-    // port    : `${config.get('database.port')}`,
+    port    : `${config.get('database.port')}`,
     user    : `${config.get('database.user')}`,
     password : `${config.get('database.password')}`,
     database : `${config.get('database.name')}`

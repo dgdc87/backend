@@ -10,12 +10,14 @@ module.exports = router
 
 router.post('/', async (req, res, next) => {
   try {
-    if (!check(req.body, ['desc'])) {
-      throw 'bad request for endpoint, mandatory: desc';
+    if (!check(req.body, ['descr'])) {
+      res.status(500).send(JSON.stringify({error: 'bad request for endpoint, mandatory: descr', code: 'mandatory'}));      
     }
-    const response = await db.query(queries.role.create,[req.body.desc]);
-    req.body.id = parseInt(response.rows[0].id);
-    res.status(200).send(JSON.stringify(req.body));
+    db.query(queries.role.create, [req.body.descr]).then( result => {
+      res.status(200).send(JSON.stringify(result.insertId));
+    }, error => {
+      res.status(500).send(JSON.stringify(error));
+    })
   } catch (e) {
     logger.error(`role.js => error: ${e}`);
     next(e);
@@ -25,8 +27,11 @@ router.post('/', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
-    await db.query(queries.role.delete,[id]);
-    res.status(200).send({deleted: id});
+    db.query(queries.role.delete, [id]).then( result => {
+        res.status(200).send(JSON.stringify({deleted: id}));
+    }, error => {
+        res.status(500).send(JSON.stringify(error));
+    })
   } catch (e) {
     logger.error(`role.js => error: ${e}`);
     next(e);
@@ -62,12 +67,15 @@ router.get('/:id', async (req, res, next) => {
 
 router.put('/:id', async (req, res, next) => {
   try {
-    if (!check(req.body, ['desc'])) {
-      throw 'bad request for endpoint, mandatory: desc';
+    if (!check(req.body, ['descr'])) {
+      res.status(500).send(JSON.stringify({error: 'bad request for endpoint, mandatory: descr', code: 'mandatory'}));   
     }
     const { id } = req.params;
-    const result = await db.query(queries.role.update, [req.body.desc, id]);
-    res.status(200).send({updated: id});
+    db.query(queries.role.update, [req.body.descr, id]).then( result => {
+        res.status(200).send(JSON.stringify({updated: id}));
+    }, error => {
+        res.status(500).send(JSON.stringify(error));
+    })
   } catch (e) {
     logger.error(`role.js => error: ${e}`);
     next(e);

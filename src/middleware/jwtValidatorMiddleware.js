@@ -8,20 +8,20 @@ const config     = require('config');
 
 const jwtConfig = config.get('jwt');
 
-const routesToFilter = {
+const routesToAvoidFilter = {
     '/favicon.ico': [],
-    '/role': [],
-    '/role/*': ['GET'],
-    '/users/login': [],
-    '/users/logout':[],
-    '/users/signin':[],
+    // '/role': ['GET', 'POST'],
+    // '/role/*': ['GET', 'DELETE', 'PUT'],
+    '/user/login': [],
+    '/user/logout':[],
+    '/user/signin':[],
 }
 
-genericUrl = url => {
+genericJWTUrl = url => {
     let match = null;
-    Object.keys(routesToFilter).filter( r => r.indexOf('*') >= 0).forEach( r => {
+    Object.keys(routesToAvoidFilter).filter( r => r.indexOf('*') >= 0).forEach( r => {
         if(url.indexOf(r.split('*')[0]) >= 0){
-            match = routesToFilter[r];
+            match = routesToAvoidFilter[r];
         }    
     });
     return match;
@@ -29,30 +29,34 @@ genericUrl = url => {
 
 const jwtValidator = async (req, res, next) => {
   try {
-    let filter = routesToFilter[req.originalUrl] ? routesToFilter[req.originalUrl] :  genericUrl(req.originalUrl);
+    let filter = routesToAvoidFilter[req.originalUrl] ? routesToAvoidFilter[req.originalUrl] :  genericJWTUrl(req.originalUrl);
     if ( filter && (filter.length === 0 || filter.indexOf(req.method.toUpperCase()) >= 0 )) {
         logger.info(`jwtValidator => don´t check token for ${req.originalUrl}`);
         return next();
     }
-    console.log(req.originalUrl)
     if (typeof req.get('token') === 'undefined' || req.get('token') === null) {
       throw 'Bad request for endpoint, mandatory token at headers';
     }
-    const response = await db.query(queries.util.getUserJwt,[req.get('token')]);
-    if (response.rows.length === 0) {
-      throw 'Not valid token for request';
-    }
-    jwt.verify(req.get('token'), jwtConfig.secret, (error, decoded) => {
-      if (typeof error === 'undefined' || error === null) {
-        if (response.rows[0].username === decoded.username) {
-            next();
-        } else {
-            throw 'Not valid token for request';
-        }
-      } else {
-        throw error;
+    
+    db.query(queries.jwt.getUserJwt, [req.get('token')]).then( response => {
+      if (response.length === 0) {
+        res.status(401).send(JSON.stringify('Not valid token for request'));
       }
-    });
+      jwt.verify(req.get('token'), jwtConfig.secret, (error, decoded) => {
+        if (typeof error === 'undefined' || error === null) {
+          if (response[0].username === decoded.username) {
+              next();
+          } else {
+            res.status(401).send(JSON.stringify('Not valid token for request => Username don´t match'));
+          }
+        } else {
+          res.status(401).send(JSON.stringify('Not valid token for request => jwt.verify'));
+        }
+      });
+    }, error => {
+      res.status(401).send(JSON.stringify(error));
+    })
+    
   } catch (e) {
     logger.error(`Not valid jwt: ${e}`);
     res.status(401).send(e instanceof Error ? e.stack : e);
@@ -60,5 +64,5 @@ const jwtValidator = async (req, res, next) => {
 }
 
 module.exports = {
-  jwtValidator,
+  jwtValidator
 }

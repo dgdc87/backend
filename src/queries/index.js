@@ -1,32 +1,34 @@
 // All the queries here (meassurement, right now is a special case)
 
 user = {
-    create:      'INSERT INTO user (username, firstname, lastname, email, id_role, pass, reg_date, update_date, last_login, jwt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
-    delete:      'DELETE FROM user WHERE id = $1',
-    update:      'UPDATE user SET username = $1, firstname = $2, lastname = $3, email = $4, id_role = $5, update_date = $6 WHERE id = $7',
-    read:        'SELECT * FROM user WHERE 1=1 ORDER BY id',
-    getById:     'SELECT u.id, u.username, u.firstname, u.lastname, u.email, u.last_login, u.id_role, r.descr AS role FROM user u JOIN role r ON u.id_role = r.id WHERE u.id = $1',
-    credentials: 'SELECT * FROM user WHERE username = $1 AND pass = $2',
-    login:       'UPDATE user SET jwt = $1, last_login = $3 WHERE id = $2',
-    logout:      'UPDATE user SET jwt = null WHERE id = $1',
+    create:      'INSERT INTO user (username, firstname, lastname, email, id_role, pass, reg_date, update_date, last_login, jwt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    delete:      'DELETE FROM user WHERE id = ?',
+    update:      'UPDATE user SET firstname = ?, lastname = ?, email = ?, update_date = ? WHERE id = ?',
+    read:        'SELECT username, firstname, lastname, email, id_role, reg_date, update_date, last_login FROM user WHERE 1=1 ORDER BY id',
+    getById:     'SELECT id, username, firstname, lastname, email, last_login, id_role FROM user WHERE id = ?',
+    credentials: 'SELECT * FROM user WHERE username = ? AND pass = ?',
+    login:       'UPDATE user SET jwt = ?, last_login = ? WHERE id = ?',
+    logout:      'UPDATE user SET jwt = null WHERE id = ?',
 }
 
 role = {
-    create:  'INSERT INTO roles (descr) VALUES ($1) RETURNING id',
-    delete:  'DELETE FROM roles WHERE id = $1',
-    update:  'UPDATE roles SET descr = $1 WHERE id = $2',
+    create:  'INSERT INTO roles (descr) VALUES (?)',
+    delete:  'DELETE FROM roles WHERE id = ?',
+    update:  'UPDATE roles SET descr = ? WHERE id = ?',
     read:    'SELECT * FROM roles WHERE 1',
-    getById: 'SELECT * FROM roles WHERE id = ?'
+    getById: 'SELECT * FROM roles WHERE id = ?',
+    getByDescr: 'SELECT id FROM roles WHERE descr = ?'
 }
 
 
-util = {
-    getUserJwt: 'SELECT * FROM user WHERE jwt = $1',
+jwt = {
+    getUserJwt: 'SELECT * FROM user WHERE jwt = ?',
+    getRoleJwt: 'SELECT roles.descr FROM user INNER JOIN roles ON user.id_role = roles.id and user.jwt = ?',
 }
 
 
 module.exports = {
     user,
     role,
-    util
+    jwt
 }
