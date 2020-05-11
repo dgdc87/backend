@@ -14,7 +14,7 @@
     "Socket.io"
   ],
   "author": "Diego González del Campo",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "bluebird": "^3.7.2",
     "config": "^3.3.1",
